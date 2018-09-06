@@ -4,5 +4,5 @@
   "validationToken": "verify-token-mkmart",
   "serverURL": "https://chatbotbase.herokuapp.com",
   "mongoUrl": "mongodb://root:aicheukux4Eeg2eiThoh0aiwohvaHier@35.240.175.168:27017/?authMechanism=SCRAM-SHA-1&authSource=admin&connectTimeoutMS=30000&maxIdleTimeMS=600000",
-  "databasename": "hksv"
+  "databasename": "no1"
 }
