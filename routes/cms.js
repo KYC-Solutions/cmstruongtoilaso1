@@ -406,7 +406,7 @@ router.get('/getMemberByGroup', (req, res) => {
     }
     console.log("getMemberByGroup", code);
     objDb.getConnection(function (client) {
-        objDb.findMembersByGroup(pipeline, options, client, function (results) {
+        objDb.findMembersGameByGroup(pipeline, options, client, function (results) {
             client.close();
             res.send(results);
         });
@@ -443,7 +443,7 @@ router.get('/getUserByGroup', (req, res) => {
     }
     console.log("getUserByGroup", code);
     objDb.getConnection(function (client) {
-        objDb.findMembersGameByGroup(pipeline, options, client, function (results) {
+        objDb.findMembersByGroup(pipeline, options, client, function (results) {
             client.close();
             res.send(results);
         });

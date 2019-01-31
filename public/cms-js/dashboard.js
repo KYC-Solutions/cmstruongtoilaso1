@@ -7,7 +7,7 @@ var isComplate=true;
 function onInit(){
 
  getData();
-	getData1();
+	//getData1();
 	
 };
 
