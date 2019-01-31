@@ -1,6 +1,21 @@
 ﻿var express = require('express');
 var router = express.Router();
+var config = require('config');
+const {
+	MessengerClient
+} = require('messaging-api-messenger');
+const {
+	MessengerBatch
+} = require('messaging-api-messenger');
 var Cryptojs = require("crypto-js");//Toanva add
+
+const PAGE_ACCESS_TOKEN = (process.env.MESSENGER_PAGE_ACCESS_TOKEN) ?
+	(process.env.MESSENGER_PAGE_ACCESS_TOKEN) :
+	config.get('pageAccessToken');
+const client = MessengerClient.connect({
+    accessToken: PAGE_ACCESS_TOKEN,
+    version: '3.1',
+});
 
 var objDb = require('../object/database.js');
 const bodyParser = require('body-parser');
@@ -21,8 +36,20 @@ router.get('/member', function (req, res, next) {
     });
 });
 
+router.get('/sendmessage', function (req, res, next) {
+    res.sendFile('sendmessage.html', {
+        root: "views/cms"
+    });
+});
+
 router.get('/chart', function (req, res, next) {
     res.sendFile('chart.html', {
+        root: "views/cms"
+    });
+});
+
+router.get('/gift', function (req, res, next) {
+    res.sendFile('redeemgift.html', {
         root: "views/cms"
     });
 });
@@ -121,6 +148,9 @@ router.get('/getMemberCMS', (req, res) => {
             Position: position
         });
     }
+    Object.assign(query, {
+            Type: "Candidates"
+        });
     console.log("GetMemberCMS query", query);
     objDb.getConnection(function (client) {
         objDb.findMembers(query, client, function (results) {
@@ -130,6 +160,95 @@ router.get('/getMemberCMS', (req, res) => {
     });
 });
 //Toanva getMemberCMS end
+//Toanva add getMemberSendMessage
+router.get('/getMemberSendMessage', (req, res) => {
+    if (req.session == null || req.session.admin == null) {
+        return res.sendStatus(401);
+    }
+    var name = req.query.name;
+    var psid = req.query.psid;
+    var type = req.query.type;
+    var phone = req.query.phone;
+    var schools = req.query.schools;
+    var placeofcontest = req.query.placeofcontest;
+    if (psid == null || psid == 'all')
+        psid = "";
+    if (name == null || name == 'all')
+        name = "";
+    if (phone == null || phone == 'all')
+        phone = "";
+    if (type == null || type == 'all')
+        type = "";
+    if (schools == null || schools == 'all')
+        schools = "";
+    if (placeofcontest == null || placeofcontest == 'all')
+        placeofcontest = "";
+    
+    var query = {};
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (psid != "") {
+        Object.assign(query, {
+            _id: psid
+        });
+    }
+    
+    if (phone != "") {
+        phone = ".*" + phone + ".*";
+        Object.assign(query, {
+            Phone: {
+                $regex: phone
+            }
+        });
+    }
+
+    if (placeofcontest != "") {
+        placeofcontest = ".*" + placeofcontest + ".*";
+        Object.assign(query, {
+            PlaceOfContest: {
+                $regex: placeofcontest
+            }
+        });
+    }
+
+    if (schools != "") {
+        schools = ".*" + schools + ".*";
+        Object.assign(query, {
+            Schools: {
+                $regex: schools
+            }
+        });
+    }
+
+    if (type != "") {
+        Object.assign(query, {
+            Type: type
+        });
+    }
+    
+    console.log("GetMemberCMS query", query);
+    objDb.getConnection(function (client) {
+        objDb.findMembers(query, client, function (results) {
+            client.close();
+            res.send(results);
+        });
+    });
+});
+//Toanva getMemberSendMessage end
 router.get('/getListMemberKsv', (req, res) => {
 
     var psid = req.query.psid;
@@ -265,7 +384,8 @@ router.get('/getMemberByGroup', (req, res) => {
     var options = {};
     var pipeline = [];
     if (code == "day") {
-        pipeline = [{
+        pipeline = [
+            {
             "$group": {
                 _id: {
                     date: { $dateToString: { format: "%Y-%m-%d", date: "$InsertDate" } }
@@ -290,6 +410,333 @@ router.get('/getMemberByGroup', (req, res) => {
             client.close();
             res.send(results);
         });
+    });
+});
+
+router.get('/getUserByGroup', (req, res) => {
+    if (req.session == null || req.session.admin == null) {
+        return res.sendStatus(401);
+    }
+    var code = req.query.code;
+    var options = {};
+    var pipeline = [];
+    if (code == "day") {
+        pipeline = [
+            {
+            "$group": {
+                _id: {
+                    date: { $dateToString: { format: "%Y-%m-%d", date: "$InsertDate" } }
+                },
+                count: { $sum: 1 }
+            }
+        }, {
+            "$sort": {
+                "_id.date": 1
+            }
+        }, {
+            "$project": {
+                "_id": 0,
+                "Date": "$_id.date",
+                "Total": "$count"
+            }
+        }];
+    }
+    console.log("getUserByGroup", code);
+    objDb.getConnection(function (client) {
+        objDb.findMembersGameByGroup(pipeline, options, client, function (results) {
+            client.close();
+            res.send(results);
+        });
+    });
+});
+
+router.post('/sendMessageToMember', function (req, res) {
+    let body = req.body;
+
+    var msg = body.message;
+    //console.log("PAGE_ACCESS_TOKEN: ", PAGE_ACCESS_TOKEN);
+    console.log("Send message text: ", msg); 
+    var qk = {
+        quick_replies: [{
+            content_type: 'text',
+            title: 'Quay về menu',
+            payload: 'menu',
+        },]
+    };
+    var arr = [];
+    var name = body.name;
+    console.log("query name: ", name);
+    var psid = body.psid;
+    var type = body.type;
+    var phone = body.phone;
+    var schools = body.schools;
+    var placeofcontest = body.placeofcontest;
+    if (psid == null || psid == 'all')
+        psid = "";
+    if (name == null || name == 'all')
+        name = "";
+    if (phone == null || phone == 'all')
+        phone = "";
+    if (type == null || type == 'all')
+        type = "";
+    if (schools == null || schools == 'all')
+        schools = "";
+    if (placeofcontest == null || placeofcontest == 'all')
+        placeofcontest = "";
+
+    var query = {};
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (psid != "") {
+        Object.assign(query, {
+            _id: psid
+        });
+    }
+    if (phone != "") {
+        phone = ".*" + phone + ".*";
+        Object.assign(query, {
+            Phone: {
+                $regex: phone
+            }
+        });
+    }
+    if (placeofcontest != "") {
+        placeofcontest = ".*" + placeofcontest + ".*";
+        Object.assign(query, {
+            PlaceOfContest: {
+                $regex: placeofcontest
+            }
+        });
+    }
+    if (schools != "") {
+        schools = ".*" + schools + ".*";
+        Object.assign(query, {
+            Schools: {
+                $regex: schools
+            }
+        });
+    }
+
+    if (type != "") {
+        Object.assign(query, {
+            Type: type
+        });
+    }
+
+    
+    objDb.getConnection(function (clientDB) {
+        objDb.findMembers(query, clientDB, function (results) {
+            clientDB.close();
+            console.log("Total member: ", results.length);
+            //2066859706671769 psid toanva
+            //Test messae
+            //MessengerBatch.sendText("2066859706671769", msg, qk);
+            //Test messae
+            //arr.push(MessengerBatch.sendText("2066859706671769", msg, qk));
+            //client.sendBatch(arr);
+            //console.log("Send member: ", arr);
+            //console.log("Send member: ", arr.length);
+            
+            var j = 0;
+            for (var i = 0; i < results.length; i++) {
+
+                console.log("add member: ", results[i]._id);
+                var id = results[i]._id.toString();
+
+                arr.push(MessengerBatch.sendText(id, msg, qk));
+                if (j == 7) {
+                    client.sendBatch(arr);
+                    console.log("Send member: ", arr.length);
+                    j = 0;
+                    arr = [];
+                } else if ((results.length - 1) < 7 && j == (results.length - 1)) {
+                    client.sendBatch(arr);
+                    console.log("Total Send member: ", results.length);
+                    j = 0;
+                    arr = [];
+                }
+                j++;
+            }
+            res.json({ success: "true", message: 'Gửi tin nhắn thành công' });
+        });
+    });
+});
+router.get('/getMemberSendMessage', (req, res) => {
+    if (req.session == null || req.session.admin == null) {
+        return res.sendStatus(401);
+    }
+    var name = req.query.name;
+    var psid = req.query.psid;
+    var type = req.query.type;
+    var phone = req.query.phone;
+    var schools = req.query.schools;
+    var placeofcontest = req.query.placeofcontest;
+    if (psid == null || psid == 'all')
+        psid = "";
+    if (name == null || name == 'all')
+        name = "";
+    if (phone == null || phone == 'all')
+        phone = "";
+    if (type == null || type == 'all')
+        type = "";
+    if (schools == null || schools == 'all')
+        schools = "";
+    if (placeofcontest == null || placeofcontest == 'all')
+        placeofcontest = "";
+
+    var query = {};
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    if (psid != "") {
+        Object.assign(query, {
+            _id: psid
+        });
+    }
+
+    if (phone != "") {
+        phone = ".*" + phone + ".*";
+        Object.assign(query, {
+            Phone: {
+                $regex: phone
+            }
+        });
+    }
+
+    if (placeofcontest != "") {
+        placeofcontest = ".*" + placeofcontest + ".*";
+        Object.assign(query, {
+            PlaceOfContest: {
+                $regex: placeofcontest
+            }
+        });
+    }
+
+    if (schools != "") {
+        schools = ".*" + schools + ".*";
+        Object.assign(query, {
+            Schools: {
+                $regex: schools
+            }
+        });
+    }
+
+    if (type != "") {
+        Object.assign(query, {
+            Type: type
+        });
+    }
+
+    console.log("GetMemberCMS query", query);
+    objDb.getConnection(function (client) {
+        objDb.findMembers(query, client, function (results) {
+            client.close();
+            res.send(results);
+        });
+    });
+});
+
+router.get('/getRedeemGifts', (req, res) => {
+    if (req.session == null || req.session.admin == null) {
+        return res.sendStatus(401);
+    }
+    var name = req.query.name;
+    var psid = req.query.psid;
+    var status = req.query.status;
+    var value = req.query.value;
+    
+    if (psid == null || psid == 'all')
+        psid = "";
+    if (name == null || name == 'all')
+        name = "";
+    if (status == null || status == 'all')
+        status = "";
+    if (value == null || value == 'all')
+        value = "";
+    
+    var query = {};
+    if (name != "") {
+        name = ".*" + name + ".*";
+        Object.assign(query, {
+            Name: {
+                $regex: name
+            }
+        });
+    }
+    
+    if (psid != "") {
+        Object.assign(query, {
+            _id: psid
+        });
+    }
+
+    if (value != "") {
+        Object.assign(query, {
+            PointValue: Number(value)
+        });
+    }
+
+    if (status != "") {
+        Object.assign(query, {
+            Status: status
+        });
+    }
+
+    console.log("getRedeemGifts query", query);
+    objDb.getConnection(function (client) {
+        objDb.findRedeemGifts(query, client, function (results) {
+            client.close();
+            res.send(results);
+        });
+    });
+});
+
+router.post('/updateStatusGift', function (req, res) {
+    let body = req.body;
+    var giftcode = body.GiftCode;
+    
+    objDb.getConnection(function (client) {
+        console.log("GiftCode: ", giftcode);
+        //Update
+        objDb.updateStatusGift(giftcode, client, function (err, results) {
+            if (err) {
+                console.log("Update Status Gift Error ", err);
+                res.json({ success: "false", message: err });
+            } else {
+                res.json({ success: "true", message: "Duyệt thành công" });
+                console.log("Update Status Gift Success");
+            }
+            console.log("editUser: Close Connction")
+            client.close();
+        });
+        
     });
 });
 module.exports = router;

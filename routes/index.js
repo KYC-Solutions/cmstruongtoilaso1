@@ -25,8 +25,14 @@ const client = MessengerClient.connect({
 });
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+/*router.get('/', function(req, res, next) {
   res.render('hksv', { title: 'CUỘC THI HOA KHÔI SINH VIÊN VIỆT NAM 2018 chatbot on Facebook Messenger' });
+});*/
+
+router.get('/', function (req, res, next) {
+    res.sendFile('login.html', {
+        root: "views/cms"
+    });
 });
 
 router.get('/facebook', function(req, res, next) {

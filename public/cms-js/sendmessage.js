@@ -15,29 +15,24 @@ var datatable = $('#grvResult').DataTable({
     ],
     ajax: {
         dataType: "json",
-        url: "/cms/getMemberCMS",
+        url: "/cms/getMemberSendMessage",
         data: function (d) {
             var name = "";
-            var provincial = "";
-            var districts = "";
-            var wards = "";
-            var blockstatus = "";
-            var position = "";
-            var layer = "";
-            var level = "";
-            if ($('#txtName').val() != "" && $('#txtName').val() != undefined)
-                name = $("#txtName").val();
-            //if (cboStatus.selectedIndex != 0)
-            //    blockstatus = cboStatus.value;
-            d.phone = "";//$("#txtPhone").val();
+            var type = "";
+            var phone = "";
+            var schools = "";
+            var placeofcontest = "";
+            if ($('#txtName').val() != "" && $('#txtName').val() != undefined) name = $("#txtName").val();
+            if (document.getElementById("cboType").selectedIndex != 0) type = document.getElementById("cboType").value;
+            if ($('#txtPhone').val() != "" && $('#txtPhone').val() != undefined) phone = $("#txtPhone").val();
+            if ($('#txtSchools').val() != "" && $('#txtSchools').val() != undefined) schools = $("#txtSchools").val();
+            if ($('#txtPlaceOfContest').val() != "" && $('#txtPlaceOfContest').val() != undefined) placeofcontest = $("#txtPlaceOfContest").val();
+            
             d.name = name;
-            d.position = position;
-            d.blockstatus = blockstatus;
-            d.provincial = provincial;
-            d.districts = districts;
-            d.wards = wards;
-            d.level = level;
-            d.layer = "";
+            d.type = type;
+            d.phone = phone;
+            d.schools = schools;
+            d.placeofcontest = placeofcontest;
             d.psid = "";
         },
         error: function (err) {
@@ -49,38 +44,38 @@ var datatable = $('#grvResult').DataTable({
         dataSrc: ""
     },
     columnDefs: [
+        //{
+        //    targets: [5],
+        //    visible: false
+        //},
+        //{
+        //    targets: [6],
+        //    visible: false
+        //},
         {
-            targets: [7],
-            visible: false
-        },
-        {
-            targets: [8],
-            visible: false
-        },
-        {
-            targets: [9],
+            targets: [5],
             visible: false
         }
     ],
     columns: [
         { data: 'Name', defaultContent: "" },
         { data: 'CandidatesCode', defaultContent: "" },
-        {
-            data: 'Url1', render: function (data, type, row, meta) {
-                return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200" width="200">' : '';
-            }
-        },
-        {
-            data: 'Url2', render: function (data, type, row, meta) {
-                return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200"  width="200">' : '';
-            }
-        },
+        //{
+        //    data: 'Url1', render: function (data, type, row, meta) {
+        //        return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200" width="200">' : '';
+        //    }
+        //},
+        //{
+        //    data: 'Url2', render: function (data, type, row, meta) {
+        //        return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200"  width="200">' : '';
+        //    }
+        //},
         { data: 'Phone', defaultContent: "" },
         { data: 'Schools', defaultContent: "" },
         //{ data: 'Schools', defaultContent: "" },
         { data: 'PlaceOfContest', defaultContent: "" },
-        { data: 'Url1', defaultContent: "" },
-        { data: 'Url2', defaultContent: "" },
+        //{ data: 'Url1', defaultContent: "" },
+        //{ data: 'Url2', defaultContent: "" },
         {
             data: 'InsertDate', render: function (data, type, row, meta) {
                 return formatDateDetail1(data);
@@ -115,6 +110,43 @@ var datatable = $('#grvResult').DataTable({
 function SearchMember() {
     datatable.ajax.reload();
     datatable.draw();
+};
+
+function SendMessage() {
+    var data_query = {};
+    var message= "";
+    var name = "";
+    var type = "";
+    var phone = "";
+    var schools = "";
+    var placeofcontest = "";
+    if ($('#txtName').val() != "" && $('#txtName').val() != undefined) name = $("#txtName").val();
+    if (document.getElementById("cboType").selectedIndex != 0) type = document.getElementById("cboType").value;
+    if ($('#txtPhone').val() != "" && $('#txtPhone').val() != undefined) phone = $("#txtPhone").val();
+    if ($('#txtSchools').val() != "" && $('#txtSchools').val() != undefined) schools = $("#txtSchools").val();
+    if ($('#txtPlaceOfContest').val() != "" && $('#txtPlaceOfContest').val() != undefined) placeofcontest = $("#txtPlaceOfContest").val();
+    if ($('#txtMessage').val() != "" && $('#txtMessage').val() != undefined) message = $("#txtMessage").val();
+    data_query.message = message;
+    data_query.name = name;
+    data_query.type = type;
+    data_query.phone = phone;
+    data_query.schools = schools;
+    data_query.placeofcontest = placeofcontest;
+    data_query.psid = "";
+    $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: "/cms/sendMessageToMember",
+        data: JSON.stringify(data_query),
+        success: function (data) {
+            if (data.success == "true") {
+                alert("Gửi tin nhắn thành công");
+            }
+            else {
+                alert(data.message);
+            }
+        }
+    });
 };
 
 function ShowDetail(id) {
