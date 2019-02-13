@@ -12,7 +12,7 @@ var datatable = $('#grvResult').DataTable({
     ],
     ajax: {
         dataType: "json",
-        url: "/cms/getNumberUsed",
+        url: "/cms/getWonNumber",
         data: function (d) {
         },
         error: function (err) {
