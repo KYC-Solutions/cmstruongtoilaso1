@@ -36,6 +36,18 @@ router.get('/member', function (req, res, next) {
     });
 });
 
+router.get('/number', function (req, res, next) {
+    res.sendFile('number.html', {
+        root: "views/cms"
+    });
+});
+
+router.get('/won', function (req, res, next) {
+    res.sendFile('won.html', {
+        root: "views/cms"
+    });
+});
+
 router.get('/sendmessage', function (req, res, next) {
     res.sendFile('sendmessage.html', {
         root: "views/cms"
@@ -83,6 +95,49 @@ router.get('/getMemberCMS', (req, res) => {
             res.send(results);
         });
     });
+});
+router.get('/getWonNumber', (req, res) => {
+
+	//var psid = req.query.psid;
+	//console.log("getListNumber psid: ", psid);
+	var query = {};
+	//console.log("getListMember query: ", query);
+	objDb.getConnection(function (clientDb) {
+		objDb.findWonNumbers({}, clientDb, function (err, rs2) {
+
+			console.log('list win member', rs2.length);
+			clientDb.close();
+			res.send(rs2);
+
+			//console.log(results);
+
+		});
+		clientDb.close();
+		// res.send(null);
+	});
+});
+router.get('/getNumberUsed', (req, res) => {
+
+	var query = {
+		Used: 1
+	};
+	//console.log("getListMember query: ", query);
+	objDb.getConnection(function (clientDb) {
+		objDb.findNumberUsed(query, clientDb, function (err, rs2) {
+			if (err) {
+				res.send(null);
+				clientDb.close();
+			} else {
+				console.log('list number', rs2.length);
+				clientDb.close();
+
+				res.send(rs2);
+			} //console.log(results);
+
+		});
+
+		// res.send(null);
+	});
 });
 //Toanva getMemberCMS end
 //Toanva add getMemberSendMessage

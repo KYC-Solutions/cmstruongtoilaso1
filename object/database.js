@@ -69,6 +69,41 @@ module.exports = {
             }
         });
     },
+	findNumberUsed: function (query, client, callback) {
+		// Get the documents collection
+
+		const db = client.db(DATA_BASE_NAME);
+		const collection = db.collection('StoreNumber');
+		console.log("findNumberUsed", query);
+		// Find some documents
+		collection.find(query).toArray(function (err, results) {
+			//    assert.equal(err, null);
+			if (err) {
+				console.log("err:", err);
+				callback(err);
+			} else {
+				callback(null, results);
+			}
+		});
+	},
+	findWonNumbers: function (query, client, callback) {
+		// Get the documents collection
+		//console.log("222");
+		const db = client.db(DATA_BASE_NAME);
+		const collection = db.collection('WonNumber');
+		// Find some documents
+		collection.find(query).sort({
+			"WonDate": -1
+		}).toArray(function (err, results) {
+			//    assert.equal(err, null);
+			if (err) {
+				console.log("err:", err);
+				callback(err);
+			} else {
+				callback(null, results);
+			}
+		});
+	},
     findRedeemGifts: function (query, client, callback) {
         // Get the documents collection
         const db = client.db(DATA_BASE_NAME);

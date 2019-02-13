@@ -12,7 +12,7 @@ var datatable = $('#grvResult').DataTable({
     ],
     ajax: {
         dataType: "json",
-        url: "/cms/getMemberCMS",
+        url: "/cms/getNumberUsed",
         data: function (d) {
         },
         error: function (err) {
@@ -30,18 +30,19 @@ var datatable = $('#grvResult').DataTable({
         }
     ],*/
     columns: [
-        { data: 'Name', defaultContent: "" },
+        { data: 'Num', defaultContent: "" },
+		{ data: 'Name', defaultContent: "" },
         /*{
             data: 'Url1', render: function (data, type, row, meta) {
                 return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200" width="200">' : '';
             }
         },*/
         {
-            data: 'InsertDate', render: function (data, type, row, meta) {
+            data: 'GotDate', render: function (data, type, row, meta) {
                 return formatDateDetail1(data);
             }
-        },
-        { data: 'TotailShareActive', defaultContent: "" }
+        }
+       
         //{
         //    data: 'Name', render: function (data, type, row, meta) {
         //        return '<a href="#" onclick="ShowDetail(' + row._id + ')">' + data + '</a>';
