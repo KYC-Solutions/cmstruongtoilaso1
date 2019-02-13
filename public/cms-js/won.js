@@ -30,8 +30,9 @@ var datatable = $('#grvResult').DataTable({
         }
     ],*/
     columns: [
-        { data: 'Num', defaultContent: "" },
-		{ data: 'Name', defaultContent: "" },
+        { data: 'Name', defaultContent: "" },
+		{ data: 'Num', defaultContent: "" },
+		{ data: 'Gift', defaultContent: "" },
         /*{
             data: 'Url1', render: function (data, type, row, meta) {
                 return data !== undefined ? '<img class="img-responsive center-block img-rounded" alt="Responsive image" src="' + data + '" height="200" width="200">' : '';
