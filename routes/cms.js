@@ -69,7 +69,7 @@ router.post('/getkeyCMS', function (req, res) {
 router.get('/getMemberCMS', (req, res) => {
     if (req.session == null || req.session.admin == null) {
         return res.sendStatus(401);
-    
+	}
     var query = {
 		Name: {
 			$exists: true
