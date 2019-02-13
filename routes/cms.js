@@ -69,88 +69,13 @@ router.post('/getkeyCMS', function (req, res) {
 router.get('/getMemberCMS', (req, res) => {
     if (req.session == null || req.session.admin == null) {
         return res.sendStatus(401);
-    }
-    var name = req.query.name;
-    var psid = req.query.psid;
-    var provincial = req.query.provincial;
-    var districts = req.query.districts;
-    var wards = req.query.wards;
-    var position = req.query.position;
-    var level = req.query.level;
-    var layer = req.query.layer;
-    var blockstatus = req.query.blockstatus;
-    var phone = req.query.phone;
-    if (psid == null || psid == 'all')
-        psid = "";
-    if (name == null || name == 'all')
-        name = "";
-    if (provincial == null || provincial == 'all' || provincial == 'NA')
-        provincial = "";
-    if (districts == null || districts == 'all' || districts == 'NA')
-        districts = "";
-    if (wards == null || wards == 'all' || wards == 'NA')
-        wards = "";
-    if (position == null || position == 'all' || position == 'NA')
-        position = "";
-    if (level == null || level == 'all' || level == 'NA')
-        level = "";
-    if (layer == null || layer == 'all' || layer == 'NA')
-        layer = "";
-    if (blockstatus == null || blockstatus == 'all')
-        blockstatus = "";
-    if (phone == null || phone == 'all')
-        phone = "";
-    var query = {};
-    if (name != "") {
-        name = ".*" + name + ".*";
-        Object.assign(query, {
-            Name: {
-                $regex: name
-            }
-        });
-    }
-    if (psid != "") {
-        Object.assign(query, {
-            _id: psid
-        });
-    }
-    if (blockstatus != "") {
-        Object.assign(query, {
-            BlockStatus: blockstatus
-        });
-    }
-    if (phone != "") {
-        phone = ".*" + phone + ".*";
-        Object.assign(query, {
-            Phone: {
-                $regex: phone
-            }
-        });
-    }
-
-    if (provincial != "") {
-        Object.assign(query, {
-            Provincial: provincial
-        });
-    }
-    if (districts != "") {
-        Object.assign(query, {
-            District: districts
-        });
-    }
-    if (wards != "") {
-        Object.assign(query, {
-            Ward: wards
-        });
-    }
-    if (position != "") {
-        Object.assign(query, {
-            Position: position
-        });
-    }
-    Object.assign(query, {
-            Type: "Candidates"
-        });
+    
+    var query = {
+		Name: {
+			$exists: true
+		}
+	};
+    
     console.log("GetMemberCMS query", query);
     objDb.getConnection(function (client) {
         objDb.findMembers(query, client, function (results) {

@@ -55,7 +55,7 @@ module.exports = {
     findMembers: function (query, client, callback) {
         // Get the documents collection
         const db = client.db(DATA_BASE_NAME);
-        collection = db.collection('Members');
+        collection = db.collection('MembersGameCMNM');
         // Find some documents
         collection.find(query).sort({
             "InsertDate": 1
