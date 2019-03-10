@@ -69,7 +69,7 @@ module.exports = {
             }
         });
     },
-	findMembers: function (query, client, callback) {
+	findMembersTeam: function (query, client, callback) {
         // Get the documents collection
         const db = client.db(DATA_BASE_NAME);
         collection = db.collection('MembersFteam');
