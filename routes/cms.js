@@ -36,6 +36,12 @@ router.get('/member', function (req, res, next) {
     });
 });
 
+router.get('/member2', function (req, res, next) {
+    res.sendFile('member2.html', {
+        root: "views/cms"
+    });
+});
+
 router.get('/number', function (req, res, next) {
     res.sendFile('number.html', {
         root: "views/cms"
