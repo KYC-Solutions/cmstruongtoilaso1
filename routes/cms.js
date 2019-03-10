@@ -96,6 +96,24 @@ router.get('/getMemberCMS', (req, res) => {
         });
     });
 });
+router.get('/getMemberTeam', (req, res) => {
+    if (req.session == null || req.session.admin == null) {
+        return res.sendStatus(401);
+	}
+    var query = {
+		Name: {
+			$exists: true
+		}
+	};
+    
+    console.log("GetMemberCMS query", query);
+    objDb.getConnection(function (client) {
+        objDb.findMembersTeam(query, client, function (results) {
+            client.close();
+            res.send(results);
+        });
+    });
+});
 router.get('/getWonNumber', (req, res) => {
 
 	//var psid = req.query.psid;
